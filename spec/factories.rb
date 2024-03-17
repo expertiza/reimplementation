@@ -1,4 +1,16 @@
 FactoryBot.define do
+  factory :duty do
+    name { "MyString" }
+    max_members_for_duty { 1 }
+    assignment { nil }
+  end
+
+  factory :badge do
+    name { "MyString" }
+    description { "MyString" }
+    image_name { "MyString" }
+  end
+
   factory :user do
     sequence(:name) { |_n| Faker::Name.name.to_s.delete(" \t\r\n").downcase }
     sequence(:email) { |_n| Faker::Internet.email.to_s }
