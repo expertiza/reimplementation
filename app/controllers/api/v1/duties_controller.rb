@@ -34,7 +34,7 @@ class Api::V1::DutiesController < ApplicationController
   # DELETE /duties/1
   def destroy
     @duty.destroy
-    head :no_content
+    render json: { message: "Badge was successfully destroyed." }, status: :ok
   end
 
   private
