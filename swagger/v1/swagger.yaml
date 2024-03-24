@@ -15,6 +15,164 @@ security:
   - bearerAuth: []
 
 paths:
+  "/api/v1/badges":
+    get:
+      summary: list badges
+      tags:
+      - Badges
+      responses:
+        '200':
+          description: successful
+    post:
+      summary: create badge
+      tags:
+      - Badges
+      description: Create a new badge
+      parameters: []
+      responses:
+        '200':
+          description: successful
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+              required:
+              - name
+              - description
+  "/api/v1/badges/{id}":
+    parameters:
+    - name: id
+      in: path
+      description: id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: show badge
+      tags:
+      - Badges
+      responses:
+        '200':
+          description: successful
+    patch:
+      summary: update badge
+      tags:
+      - Badges
+      description: Update a badge
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: successful
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+    delete:
+      summary: delete badge
+      tags:
+      - Badges
+      responses:
+        '200':
+          description: successful
+  "/api/v1/duties":
+    get:
+      summary: list duties
+      tags:
+      - Duties
+      responses:
+        '200':
+          description: successful
+    post:
+      summary: create duty
+      tags:
+      - Duties
+      description: Create a new duty
+      parameters: []
+      responses:
+        '200':
+          description: successful
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                max_members_for_duty:
+                  type: integer
+                assignment_id:
+                  type: integer
+              required:
+              - name
+              - max_members_for_duty
+              - assignment_id
+  "/api/v1/duties/{id}":
+    parameters:
+    - name: id
+      in: path
+      description: id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: show duty
+      tags:
+      - Duties
+      responses:
+        '200':
+          description: successful
+    patch:
+      summary: update duty
+      tags:
+      - Duties
+      description: Update a duty
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: successful
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                max_members_for_duty:
+                  type: integer
+                assignment_id:
+                  type: integer
+    delete:
+      summary: delete duty
+      tags:
+      - Duties
+      responses:
+        '200':
+          description: successful
+
   "/api/v1/account_requests/pending":
     get:
       summary: List all Pending Account Requests
@@ -1187,4 +1345,4 @@ servers:
 - url: http://{defaultHost}
   variables:
     defaultHost:
-      default: 127.0.0.1:3000
+      default: 127.0.0.1:3002

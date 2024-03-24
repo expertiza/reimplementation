@@ -8,6 +8,8 @@ Rails.application.routes.draw do
   post '/login', to: 'authentication#login'
   namespace :api do
     namespace :v1 do
+      resources :duties
+      resources :badges
       resources :institutions
       resources :roles do
         collection do

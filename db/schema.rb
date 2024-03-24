@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_27_171632) do
+ActiveRecord::Schema[7.0].define(version: 2024_03_17_141217) do
   create_table "account_requests", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "username"
     t.string "full_name"
@@ -100,6 +100,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_27_171632) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "badges", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.string "image_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "courses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name"
     t.string "directory_path"
@@ -112,6 +120,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_27_171632) do
     t.index ["institution_id"], name: "index_courses_on_institution_id"
     t.index ["instructor_id"], name: "fk_course_users"
     t.index ["instructor_id"], name: "index_courses_on_instructor_id"
+  end
+
+  create_table "duties", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name"
+    t.integer "max_members_for_duty"
+    t.bigint "assignment_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assignment_id"], name: "index_duties_on_assignment_id"
   end
 
   create_table "institutions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -165,10 +182,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_27_171632) do
     t.boolean "break_before"
     t.string "max_label"
     t.string "min_label"
-    t.integer "questionnaire_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "questionnaire_id", null: false
     t.index ["questionnaire_id"], name: "fk_question_questionnaires"
+    t.index ["questionnaire_id"], name: "index_questions_on_questionnaire_id"
   end
 
   create_table "response_maps", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -244,8 +262,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_27_171632) do
   add_foreign_key "account_requests", "roles"
   add_foreign_key "courses", "institutions"
   add_foreign_key "courses", "users", column: "instructor_id"
+  add_foreign_key "duties", "assignments"
   add_foreign_key "participants", "assignments"
   add_foreign_key "participants", "users"
+  add_foreign_key "questions", "questionnaires"
   add_foreign_key "roles", "roles", column: "parent_id", on_delete: :cascade
   add_foreign_key "ta_mappings", "courses"
   add_foreign_key "ta_mappings", "users"
