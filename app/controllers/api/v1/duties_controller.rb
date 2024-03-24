@@ -1,5 +1,5 @@
 class Api::V1::DutiesController < ApplicationController
-  before_action :set_duty, only: %i[ show update destroy ]
+  before_action :set_duty, only: %i[show update destroy]
 
   # GET /duties
   def index
@@ -7,26 +7,16 @@ class Api::V1::DutiesController < ApplicationController
     render json: @duties
   end
 
-  def new
-    @duty = Duty.new
-    @id = params[:id]
-  end
-
   # GET /duties/1
   def show
-    render json: @duty
-  end
-
-  def 
     render json: @duty
   end
 
   # POST /duties
   def create
     @duty = Duty.new(duty_params)
-
     if @duty.save
-      render json: @duty, status: :created, location: @duty
+      render json: @duty, status: :created
     else
       render json: @duty.errors, status: :unprocessable_entity
     end
@@ -44,17 +34,18 @@ class Api::V1::DutiesController < ApplicationController
   # DELETE /duties/1
   def destroy
     @duty.destroy
-    render json: { message: "Duty was successfully destroyed." }, status: :ok
+    head :no_content
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_duty
-      @duty = Duty.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def duty_params
-      params.require(:duty).permit(:name, :max_members_for_duty, :assignment_id)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_duty
+    @duty = Duty.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def duty_params
+    params.require(:duty).permit(:name, :max_members_for_duty, :assignment_id)
+  end
 end
