@@ -1183,6 +1183,26 @@ paths:
               required:
               - user_name
               - password
+  "/api/v1/submitted_content/{id}/edit":
+    get:
+      summary: 'Edit participant'
+      description: | 
+        Fetches a participant by ID and prepares them for editing. 
+        Signs up the participant to a team if they are not already in one, 
+        and determines if the participant can submit in the current stage.
+      parameters:
+        - name: id
+          in: path
+          description: 'ID of the participant to edit'
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 'Participant fetched and prepared for editing successfully'
+        '400':
+          description: 'Invalid ID supplied'
+        '404':
+          description: 'Participant not found'
 servers:
 - url: http://{defaultHost}
   variables:

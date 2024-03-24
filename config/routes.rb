@@ -65,6 +65,21 @@ Rails.application.routes.draw do
         get 'user/:user_id/assignment/:assignment_id/', on: :collection, action: :invitations_for_user_assignment
       end
 
+      resources :submitted_content, only: [:edit] do
+        collection do
+          get :download
+          get :folder_action
+          get :remove_hyperlink
+          post :remove_hyperlink
+          get :submit_file
+          post :submit_file
+          post :folder_action
+          post :submit_hyperlink
+          get :submit_hyperlink
+          get :view
+        end
+      end
+
       resources :account_requests do
         collection do
           get :pending, action: :pending_requests
