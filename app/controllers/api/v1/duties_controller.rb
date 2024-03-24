@@ -4,12 +4,20 @@ class Api::V1::DutiesController < ApplicationController
   # GET /duties
   def index
     @duties = Duty.all
-
     render json: @duties
+  end
+
+  def new
+    @duty = Duty.new
+    @id = params[:id]
   end
 
   # GET /duties/1
   def show
+    render json: @duty
+  end
+
+  def 
     render json: @duty
   end
 
@@ -36,7 +44,7 @@ class Api::V1::DutiesController < ApplicationController
   # DELETE /duties/1
   def destroy
     @duty.destroy
-    
+    render json: { message: "Duty was successfully destroyed." }, status: :ok
   end
 
   private
