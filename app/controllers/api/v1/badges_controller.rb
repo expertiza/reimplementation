@@ -5,7 +5,6 @@ class Api::V1::BadgesController < ApplicationController
   # GET /badges
   def index
     @badges = Badge.all
-
     render json: { badges: @badges }, status: :ok
   end
 
@@ -22,6 +21,7 @@ class Api::V1::BadgesController < ApplicationController
   # POST /badges
   def create
     @badge = Badge.new(badge_params)
+    handle_image_upload
 
     if @badge.save
       render json: { badge: @badge }, status: :created
@@ -32,6 +32,7 @@ class Api::V1::BadgesController < ApplicationController
 
   # PATCH/PUT /badges/1
   def update
+    handle_image_upload
     if @badge.update(badge_params)
       render json: { badge: @badge }, status: :ok
     else
@@ -57,6 +58,18 @@ class Api::V1::BadgesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def badge_params
-      params.require(:badge).permit(:name, :description, :image_name, :image_file)
+      params.require(:badge).permit(:name, :description, :image_name)
+    end
+
+    def handle_image_upload
+      image_file = params[:badge][:image_file]
+      if image_file
+        File.open(Rails.root.join('app', 'assets', 'images', 'badges', image_file.original_filename), 'wb') do |file|
+          file.write(image_file.read)
+        end
+        @badge.image_name = image_file.original_filename
+      else
+        @badge.image_name = ''
+      end
     end
 end
