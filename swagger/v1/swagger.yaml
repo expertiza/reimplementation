@@ -130,6 +130,152 @@ paths:
       responses:
         '204':
           description: successful
+  "/api/v1/notifications":
+    get:
+      summary: List all notifications
+      tags:
+      - Notifications
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    subject:
+                      type: string
+                    description:
+                      type: string
+                    expiration_date:
+                      type: string
+                      format: date
+                    active_flag:
+                      type: boolean
+                    course_id:
+                      type: integer
+                    user_id:
+                      type: integer
+    post:
+      summary: Create a notification
+      tags:
+      - Notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject:
+                  type: string
+                description:
+                  type: string
+                expiration_date:
+                  type: string
+                  format: date
+                active_flag:
+                  type: boolean
+                course_id:
+                  type: integer
+              required:
+              - subject
+              - course_id
+      responses:
+        '201':
+          description: Notification created successfully
+        '422':
+          description: Validation error
+
+  "/api/v1/notifications/{id}":
+    get:
+      summary: Retrieve a notification
+      tags:
+      - Notifications
+      parameters:
+      - name: id
+        in: path
+        description: ID of the notification
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Notification retrieved successfully
+        '404':
+          description: Notification not found
+    put:
+      summary: Update a notification
+      tags:
+      - Notifications
+      parameters:
+      - name: id
+        in: path
+        description: ID of the notification
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject:
+                  type: string
+                description:
+                  type: string
+                expiration_date:
+                  type: string
+                  format: date
+                active_flag:
+                  type: boolean
+                course_id:
+                  type: integer
+      responses:
+        '200':
+          description: Notification updated successfully
+        '404':
+          description: Notification not found
+        '422':
+          description: Validation error
+    delete:
+      summary: Delete a notification
+      tags:
+      - Notifications
+      parameters:
+      - name: id
+        in: path
+        description: ID of the notification
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: Notification deleted successfully
+        '404':
+          description: Notification not found
+
+  "/api/v1/notifications/{id}/toggle_active":
+    patch:
+      summary: Toggle the active status of a notification
+      tags:
+      - Notifications
+      parameters:
+      - name: id
+        in: path
+        description: ID of the notification
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Notification status toggled successfully
+        '404':
+          description: Notification not found
   "/api/v1/bookmarks":
     get:
       summary: list bookmarks

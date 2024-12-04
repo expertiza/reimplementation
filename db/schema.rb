@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_04_15_192048) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_29_041920) do
   create_table "account_requests", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "username"
     t.string "full_name"
@@ -171,6 +171,19 @@ ActiveRecord::Schema[7.0].define(version: 2024_04_15_192048) do
     t.string "type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "notifications", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "subject"
+    t.text "description"
+    t.date "expiration_date"
+    t.boolean "active_flag"
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "course_name", null: false
+    t.index ["course_name"], name: "index_notifications_on_course_name"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "participants", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -337,6 +350,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_04_15_192048) do
   add_foreign_key "assignments", "users", column: "instructor_id"
   add_foreign_key "courses", "institutions"
   add_foreign_key "courses", "users", column: "instructor_id"
+  add_foreign_key "notifications", "users"
   add_foreign_key "participants", "assignments"
   add_foreign_key "participants", "join_team_requests"
   add_foreign_key "participants", "teams"
