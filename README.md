@@ -25,5 +25,5 @@ Tutorial: [Docker Compose as a remote interpreter](https://www.jetbrains.com/hel
 alt="IMAGE ALT TEXT HERE" width="560" height="315" border="10" /></a>
 
 ### Database Credentials
-- username: root
-- password: expertiza 
+- username: **root**
+- password: **expertiza**

@@ -46,7 +46,18 @@ class Api::V1::CoursesController < ApplicationController
 
   # Adds a Teaching Assistant to the course
   def add_ta
-    user = User.find_by(id: params[:ta_id])
+    user_id = params[:ta_id] # Use user_id from the request
+    print(user_id)
+    user = User.find_by(id: user_id)
+    
+    course_id = params[:id]
+    @course = Course.find_by(id: course_id)
+  
+    if user.nil?
+      render json: { status: "error", message: "The user with id #{user_id} does not exist" }, status: :not_found
+      return
+    end
+  
     result = @course.add_ta(user)
     if result[:success]
       render json: result[:data], status: :created
