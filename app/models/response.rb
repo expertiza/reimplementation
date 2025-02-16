@@ -31,7 +31,7 @@ class Response < ApplicationRecord
     # calculates the average score of all other responses
     average_score = total / count
 
-    # This score has already skipped the unfilled scorable question(s)
+    # This score has already skipped the unfilled scorable item(s)
     score = aggregate_questionnaire_score.to_f / maximum_score
     questionnaire = questionnaire_by_answer(scores.first)
     assignment = map.assignment
@@ -50,9 +50,9 @@ class Response < ApplicationRecord
     # we accept nil as answer for scorable questions, and they will not be counted towards the total score
     sum = 0
     scores.each do |s|
-      question = Question.find(s.question_id)
+      item = Item.find(s.question_id)
       # For quiz responses, the weights will be 1 or 0, depending on if correct
-      sum += s.answer * question.weight unless s.answer.nil? || !question.scorable?
+      sum += s.answer * item.weight unless s.answer.nil? || !item.scorable?
     end
     sum
   end

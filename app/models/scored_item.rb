@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class ChoiceQuestion < Question
+class ScoredItem < ChoiceItem
   def scorable?
-      false
+      true
     end
 end

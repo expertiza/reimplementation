@@ -1,54 +1,23 @@
 require 'swagger_helper'
 require 'json_web_token'
 # Rspec tests for questions controller
-def setup_instructor
-  role = Role.find_or_create_by(name: 'Instructor', parent_id: nil)
-  expect(role).to be_present
-
-  instructor = Instructor.create!(
-    name: 'testinstructor',
-    email: 'test@test.com',
-    full_name: 'Test Instructor',
-    password: '123456',
-    role: role
-  )
-  expect(instructor).to be_valid
-
-  instructor
-end
 RSpec.describe 'api/v1/questions', type: :request do
   before(:all) do
-    # Create roles in hierarchy
-
-    @super_admin = Role.find_or_create_by(name: 'Super Administrator')
-    @admin = Role.find_or_create_by(name: 'Administrator', parent_id: @super_admin.id)
-    @instructor = Role.find_or_create_by(name: 'Instructor', parent_id: @admin.id)
-    @ta = Role.find_or_create_by(name: 'Teaching Assistant', parent_id: @instructor.id)
-    @student = Role.find_or_create_by(name: 'Student', parent_id: @ta.id)
+    @roles = create_roles_hierarchy
   end
 
-  let(:instructor) { setup_instructor }
-
-  let(:prof) { User.create(
+  let(:instructor) { User.create(
     name: "profa",
     password_digest: "password",
-    role_id: @instructor.id,
+    role_id: @roles[:instructor].id,
     full_name: "Prof A",
     email: "testuser@example.com",
     mru_directory_path: "/home/testuser",
     ) }
 
-  let(:token) { JsonWebToken.encode({id: prof.id}) }
+  let(:token) { JsonWebToken.encode({id: instructor.id}) }
   let(:Authorization) { "Bearer #{token}" }
   path '/api/v1/questions' do
-    # Creation of dummy objects for the test with the help of let statements
-    #let(:role) { Role.create(name: 'Instructor', parent_id: nil, default_page_id: nil) }
-
-    #let(:instructor) do
-    # role
-    # Instructor.create(name: 'testinstructor', email: 'test@test.com', full_name: 'Test Instructor', password: '123456', role: role)
-    #end
-
     let(:questionnaire) do
       instructor
       Questionnaire.create(
@@ -63,9 +32,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question1) do
       questionnaire
-      Question.create(
+      Item.create(
         seq: 1, 
-        txt: "test question 1", 
+        txt: "test item 1",
         question_type: "multiple_choice", 
         break_before: true, 
         weight: 5,
@@ -75,9 +44,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question2) do
       questionnaire
-      Question.create(
+      Item.create(
         seq: 2, 
-        txt: "test question 2", 
+        txt: "test item 2",
         question_type: "multiple_choice", 
         break_before: false, 
         weight: 10,
@@ -96,7 +65,7 @@ RSpec.describe 'api/v1/questions', type: :request do
       end
     end
 
-    post('create question') do
+    post('create item') do
       tags 'Questions'
       consumes 'application/json'
       produces 'application/json'
@@ -104,7 +73,7 @@ RSpec.describe 'api/v1/questions', type: :request do
       let(:valid_question_params) do
         {
           questionnaire_id: questionnaire.id,
-          txt: "test question", 
+          txt: "test item",
           question_type: "multiple_choice", 
           break_before: false,
           weight: 10
@@ -114,7 +83,7 @@ RSpec.describe 'api/v1/questions', type: :request do
       let(:invalid_question_params1) do
         {
           questionnaire_id: nil ,
-          txt: "test question", 
+          txt: "test item",
           question_type: "multiple_choice", 
           break_before: false,
           weight: 10
@@ -124,14 +93,14 @@ RSpec.describe 'api/v1/questions', type: :request do
       let(:invalid_question_params2) do
         {
           questionnaire_id: questionnaire.id ,
-          txt: "test question", 
+          txt: "test item",
           question_type: nil, 
           break_before: false,
           weight: 10
         }
       end
 
-      parameter name: :question, in: :body, schema: {
+      parameter name: :item, in: :body, schema: {
         type: :object,
         properties: {
           weight: { type: :integer },
@@ -143,31 +112,31 @@ RSpec.describe 'api/v1/questions', type: :request do
         required: %w[weight questionnaire_id break_before txt question_type]      
       }
 
-      # post request on /api/v1/questions returns 201 created response and creates a question with given valid parameters
+      # post request on /api/v1/questions returns 201 created response and creates a item with given valid parameters
       response(201, 'created') do
-        let(:question) do
+        let(:item) do
           questionnaire
-          Question.create(valid_question_params)
+          Item.create(valid_question_params)
         end
         run_test! do
           expect(response.body).to include('"seq":1')
         end
       end
 
-      # post request on /api/v1/questions returns 404 not found when questionnaire id for the given question is not present in the database
+      # post request on /api/v1/questions returns 404 not found when questionnaire id for the given item is not present in the database
       response(404, 'questionnaire id not found') do
-        let(:question) do
+        let(:item) do
           instructor
-          Question.create(invalid_question_params1)
+          Item.create(invalid_question_params1)
         end
         run_test!
       end
 
-      # post request on /api/v1/questions returns 422 unprocessable entity when incorrect parameters are passed to create a question
+      # post request on /api/v1/questions returns 422 unprocessable entity when incorrect parameters are passed to create a item
       response(422, 'unprocessable entity') do
-        let(:question) do
+        let(:item) do
           instructor
-          Question.create(invalid_question_params2)
+          Item.create(invalid_question_params2)
         end
         run_test!
       end
@@ -179,13 +148,6 @@ RSpec.describe 'api/v1/questions', type: :request do
   path '/api/v1/questions/{id}' do
 
     parameter name: 'id', in: :path, type: :integer
-    # Creation of dummy objects for the test with the help of let statements
-    let(:role) { Role.create(name: 'Instructor', parent_id: nil, default_page_id: nil) }
-    
-    let(:instructor) do 
-      role
-      Instructor.create(name: 'testinstructor', email: 'test@test.com', full_name: 'Test Instructor', password: '123456', role: role)
-    end
 
     let(:questionnaire) do
       instructor
@@ -201,9 +163,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question1) do
       questionnaire
-      Question.create(
+      Item.create(
         seq: 1, 
-        txt: "test question 1", 
+        txt: "test item 1",
         question_type: "multiple_choice", 
         break_before: true, 
         weight: 5,
@@ -213,9 +175,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question2) do
       questionnaire
-      Question.create(
+      Item.create(
         seq: 2, 
-        txt: "test question 2", 
+        txt: "test item 2",
         question_type: "multiple_choice", 
         break_before: false, 
         weight: 10,
@@ -232,27 +194,27 @@ RSpec.describe 'api/v1/questions', type: :request do
 
 
 
-    get('show question') do
+    get('show item') do
       tags 'Questions'
       produces 'application/json'
 
-      # get request on /api/v1/questions/{id} returns 200 successful response and returns question with given question id
+      # get request on /api/v1/questions/{id} returns 200 successful response and returns item with given item id
       response(200, 'successful') do
         run_test! do
-          expect(response.body).to include('"txt":"test question 1"') 
+          expect(response.body).to include('"txt":"test item 1"')
         end
       end
 
-      # get request on /api/v1/questions/{id} returns 404 not found response when question id is not present in the database
+      # get request on /api/v1/questions/{id} returns 404 not found response when item id is not present in the database
       response(404, 'not_found') do
         let(:id) { 'invalid' }
           run_test! do
-            expect(response.body).to include("Couldn't find Question")
+            expect(response.body).to include("Couldn't find Item")
           end
       end
     end
 
-    put('update question') do
+    put('update item') do
       tags 'Questions'
       consumes 'application/json'
       produces 'application/json'
@@ -265,7 +227,7 @@ RSpec.describe 'api/v1/questions', type: :request do
         }
       }
       
-      # put request on /api/v1/questions/{id} returns 200 successful response and updates parameters of question with given question id
+      # put request on /api/v1/questions/{id} returns 200 successful response and updates parameters of item with given item id
       response(200, 'successful') do
         let(:body_params) do
           {
@@ -277,7 +239,7 @@ RSpec.describe 'api/v1/questions', type: :request do
         end
       end
 
-      # put request on /api/v1/questions/{id} returns 404 not found response when question with given id is not present in the database
+      # put request on /api/v1/questions/{id} returns 404 not found response when item with given id is not present in the database
       response(404, 'not found') do
         let(:id) { 0 }
         let(:body_params) do
@@ -286,18 +248,18 @@ RSpec.describe 'api/v1/questions', type: :request do
           }
         end
         run_test! do
-          expect(response.body).to include("Couldn't find Question")
+          expect(response.body).to include("Not Found")
         end
       end
 
-      # put request on /api/v1/questions/{id} returns 422 unprocessable entity when incorrect parameters are passed for question with given question id 
+      # put request on /api/v1/questions/{id} returns 422 unprocessable entity when incorrect parameters are passed for item with given item id
       response(422, 'unprocessable entity') do
         let(:body_params) do
           {
             seq: "Dfsd"
           }
         end
-        schema type: :string
+        schema type: :object
         run_test! do
           expect(response.body).to_not include('"seq":"Dfsd"')
         end
@@ -306,7 +268,7 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     end
 
-    patch('update question') do
+    patch('update item') do
       tags 'Questions'
       consumes 'application/json'
       produces 'application/json'
@@ -319,7 +281,7 @@ RSpec.describe 'api/v1/questions', type: :request do
         }
       }
       
-      # patch request on /api/v1/questions/{id} returns 200 successful response and updates parameters of question with given question id
+      # patch request on /api/v1/questions/{id} returns 200 successful response and updates parameters of item with given item id
       response(200, 'successful') do
         let(:body_params) do
           {
@@ -331,7 +293,7 @@ RSpec.describe 'api/v1/questions', type: :request do
         end
       end
 
-      # patch request on /api/v1/questions/{id} returns 404 not found response when question with given id is not present in the database
+      # patch request on /api/v1/questions/{id} returns 404 not found response when item with given id is not present in the database
       response(404, 'not found') do
         let(:id) { 0 }
         let(:body_params) do
@@ -340,44 +302,42 @@ RSpec.describe 'api/v1/questions', type: :request do
           }
         end
         run_test! do
-          expect(response.body).to include("Couldn't find Question")
+          expect(response.body).to include("Couldn't find Item")
         end
       end
 
-      # patch request on /api/v1/questions/{id} returns 422 unprocessable entity when incorrect parameters are passed for question with given question id 
+      # patch request on /api/v1/questions/{id} returns 422 unprocessable entity when incorrect parameters are passed for item with given item id
       response(422, 'unprocessable entity') do
         let(:body_params) do
           {
             seq: "Dfsd"
           }
         end
-        schema type: :string
+        schema type: :object
         run_test! do
           expect(response.body).to_not include('"seq":"Dfsd"')
         end
-      end  
-
-
+      end
     end
 
 
-    delete('delete question') do
+    delete('delete item') do
 
       tags 'Questions'
       produces 'application/json'
 
-      # delete request on /api/v1/questions/{id} returns 204 successful response when it deletes question with given question id present in the database
+      # delete request on /api/v1/questions/{id} returns 204 successful response when it deletes item with given item id present in the database
       response(204, 'successful') do
         run_test! do
-          expect(Question.exists?(id)).to eq(false)
+          expect(Item.exists?(id)).to eq(false)
         end
       end
 
-      # delete request on /api/v1/questions/{id} returns 404 not found response when question with given question id is not present in the database
+      # delete request on /api/v1/questions/{id} returns 404 not found response when item with given item id is not present in the database
       response(404, 'not found') do
         let(:id) { 0 }
         run_test! do
-          expect(response.body).to include("Couldn't find Question")
+          expect(response.body).to include("Couldn't find Item")
         end
       end
     end
@@ -409,9 +369,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question1) do
       questionnaire
-      Question.create(
+      Item.create(
         seq: 1, 
-        txt: "test question 1", 
+        txt: "test item 1",
         question_type: "multiple_choice", 
         break_before: true, 
         weight: 5,
@@ -421,9 +381,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question2) do
       questionnaire
-      Question.create(
+      Item.create(
         seq: 2, 
-        txt: "test question 2", 
+        txt: "test item 2",
         question_type: "multiple_choice", 
         break_before: false, 
         weight: 10,
@@ -446,7 +406,7 @@ RSpec.describe 'api/v1/questions', type: :request do
       # delete method on /api/v1/questions/delete_all/questionnaire/{id} returns 200 successful response when all questions with given questionnaire id are deleted
       response(200, 'successful') do
         run_test! do
-          expect(Question.where(questionnaire_id: id).count).to eq(0)
+          expect(Item.where(questionnaire_id: id).count).to eq(0)
         end
       end
 
@@ -485,9 +445,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question1) do
       questionnaire
-      Question.create(
+      Item.create(
         seq: 1, 
-        txt: "test question 1", 
+        txt: "test item 1",
         question_type: "multiple_choice", 
         break_before: true, 
         weight: 5,
@@ -509,9 +469,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question2) do
       questionnaire2
-      Question.create(
+      Item.create(
         seq: 2, 
-        txt: "test question 2", 
+        txt: "test item 2",
         question_type: "multiple_choice", 
         break_before: true, 
         weight: 5,
@@ -521,9 +481,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question3) do
       questionnaire2
-      Question.create(
+      Item.create(
         seq: 3, 
-        txt: "test question 3", 
+        txt: "test item 3",
         question_type: "multiple_choice", 
         break_before: false, 
         weight: 10,
@@ -548,7 +508,7 @@ RSpec.describe 'api/v1/questions', type: :request do
       # get method on /api/v1/questions/show_all/questionnaire/{id} returns 200 successful response when all questions with given questionnaire id are shown
       response(200, 'successful') do
         run_test! do
-          expect(Question.where(questionnaire_id: id).count).to eq(1)
+          expect(Item.where(questionnaire_id: id).count).to eq(1)
           expect(response.body).to_not include('"questionnaire_id: "' + questionnaire2.id.to_s)
         end
       end
@@ -587,9 +547,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question1) do
       questionnaire
-      Question.create(
+      Item.create(
         seq: 1, 
-        txt: "test question 1", 
+        txt: "test item 1",
         question_type: "multiple_choice", 
         break_before: true, 
         weight: 5,
@@ -599,9 +559,9 @@ RSpec.describe 'api/v1/questions', type: :request do
 
     let(:question2) do
       questionnaire
-      Question.create(
+      Item.create(
         seq: 2, 
-        txt: "test question 2", 
+        txt: "test item 2",
         question_type: "multiple_choice", 
         break_before: false, 
         weight: 10,
@@ -609,7 +569,7 @@ RSpec.describe 'api/v1/questions', type: :request do
       )
     end
 
-    get('question types') do
+    get('item types') do
       tags 'Questions'
       produces 'application/json'
       # get request on /api/v1/questions/types returns types of questions present in the database

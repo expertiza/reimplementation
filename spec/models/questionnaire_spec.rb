@@ -16,8 +16,8 @@ describe Questionnaire, type: :model do
   end
   let(:questionnaire1) { Questionnaire.new name: 'xyz', private: 0, max_question_score: 20, instructor_id: instructor.id }
   let(:questionnaire2) { Questionnaire.new name: 'pqr', private: 0, max_question_score: 10, instructor_id: instructor.id }
-  let(:question1) { questionnaire.questions.build(weight: 1, id: 1, seq: 1, txt: "que 1", question_type: "Scale", break_before: true) }
-  let(:question2) { questionnaire.questions.build(weight: 10, id: 2, seq: 2, txt: "que 2", question_type: "Checkbox", break_before: true) }
+  let(:question1) { questionnaire.items.build(weight: 1, id: 1, seq: 1, txt: "que 1", question_type: "scale", break_before: true) }
+  let(:question2) { questionnaire.items.build(weight: 10, id: 2, seq: 2, txt: "que 2", question_type: "multiple_choice", break_before: true) }
 
 
 
@@ -103,7 +103,7 @@ describe Questionnaire, type: :model do
   describe 'associations' do
     # Test validates the association that a questionnaire comprises of several questions
     it 'has many questions' do
-      expect(questionnaire.questions).to include(question1, question2)
+      expect(questionnaire.items).to include(question1, question2)
     end
   end
 
@@ -111,7 +111,7 @@ describe Questionnaire, type: :model do
     # Test ensures calls from the method copy_questionnaire_details
     it 'allowing calls from copy_questionnaire_details' do
       allow(Questionnaire).to receive(:find).with('1').and_return(questionnaire)
-      allow(Question).to receive(:where).with(questionnaire_id: '1').and_return([Question])
+      allow(Item).to receive(:where).with(questionnaire_id: '1').and_return([Item])
     end
     
     # Test ensures creation of a copy of given questionnaire
@@ -133,9 +133,9 @@ describe Questionnaire, type: :model do
       question1.save!
       question2.save!
       copied_questionnaire = described_class.copy_questionnaire_details({ id: questionnaire.id })
-      expect(copied_questionnaire.questions.count).to eq(2)
-      expect(copied_questionnaire.questions.first.txt).to eq(question1.txt)
-      expect(copied_questionnaire.questions.second.txt).to eq(question2.txt)
+      expect(copied_questionnaire.items.count).to eq(2)
+      expect(copied_questionnaire.items.first.txt).to eq(question1.txt)
+      expect(copied_questionnaire.items.second.txt).to eq(question2.txt)
     end
   end
 

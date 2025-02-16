@@ -7,8 +7,8 @@ describe Response do
   let(:participant) { Participant.new(id: 1, user: user) }
   let(:assignment) { Assignment.new(id: 1, name: 'Test Assignment') }
   let(:answer) { Answer.new(answer: 1, comments: 'Answer text', question_id: 1) }
-  let(:question) { ScoredQuestion.new(id: 1, weight: 2) }
-  let(:questionnaire) { Questionnaire.new(id: 1, questions: [question], max_question_score: 5) }
+  let(:item) { ScoredItem.new(id: 1, weight: 2) }
+  let(:questionnaire) { Questionnaire.new(id: 1, items: [item], max_question_score: 5) }
   let(:review_response_map) { ReviewResponseMap.new(assignment: assignment, reviewee: team) }
   let(:response_map) { ResponseMap.new(assignment: assignment, reviewee: participant, reviewer: participant) }
   let(:response) { Response.new(map_id: 1, response_map: review_response_map, scores: [answer]) }
@@ -43,9 +43,9 @@ describe Response do
   # Calculate the total score of a review
   describe '#calculate_total_score' do
     it 'computes the total score of a review' do
-      question2 = double('ScoredQuestion', weight: 2)
+      question2 = double('ScoredItem', weight: 2)
       arr_question2 = [question2]
-      allow(Question).to receive(:find_with_order).with([1]).and_return(arr_question2)
+      allow(Item).to receive(:find_with_order).with([1]).and_return(arr_question2)
       allow(question2).to receive(:scorable?).and_return(true)
       allow(question2).to receive(:answer).and_return(answer)
       expect(response.calculate_total_score).to eq(2)
@@ -74,9 +74,9 @@ describe Response do
   # answer for scorable questions, and they will not be counted towards the total score)
   describe '#maximum_score' do
     it 'returns the maximum possible score for current response' do
-      question2 = double('ScoredQuestion', weight: 2)
+      question2 = double('ScoredItem', weight: 2)
       arr_question2 = [question2]
-      allow(Question).to receive(:find_with_order).with([1]).and_return(arr_question2)
+      allow(Item).to receive(:find_with_order).with([1]).and_return(arr_question2)
       allow(question2).to receive(:scorable?).and_return(true)
       allow(response).to receive(:questionnaire_by_answer).with(answer).and_return(questionnaire)
       allow(questionnaire).to receive(:max_question_score).and_return(5)
@@ -100,9 +100,9 @@ describe Response do
 
     # Expects to return ResponseMap's assignment
     it 'returns the appropriate assignment for ReviewResponseMap' do
-      question2 = double('ScoredQuestion', weight: 2)
+      question2 = double('ScoredItem', weight: 2)
       arr_question2 = [question2]
-      allow(Question).to receive(:find_with_order).with([1]).and_return(arr_question2)
+      allow(Item).to receive(:find_with_order).with([1]).and_return(arr_question2)
       allow(question2).to receive(:scorable?).and_return(true)
       allow(questionnaire).to receive(:max_question_score).and_return(5)
       allow(review_response_map).to receive(:assignment).and_return(assignment)
