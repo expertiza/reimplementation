@@ -54,8 +54,28 @@ jobs:
           bundle exec rails db:create RAILS_ENV=test
           bundle exec rails db:schema:load RAILS_ENV=test
           
+      - name: Set up code climate test-reporter
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+
       - name: Run tests
         run: bundle exec rspec spec/models
+
+      - name: Format code coverage report
+        run: ./cc-test-reporter format-coverage -t simplecov -o "coverage/codeclimate.models.json" --debug
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-artifacts
+          path: coverage/
+
+      - name: Publish code coverage
+        run: |
+          ./cc-test-reporter sum-coverage coverage/codeclimate.*.json 
+          ./cc-test-reporter after-build -t simplecov -r ${{ secrets.CC_TEST_REPORTER_ID }}
 
   docker:
     needs: test

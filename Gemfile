@@ -44,6 +44,8 @@ group :development, :test do
   gem 'rswag-specs'
   gem 'rubocop'
   gem 'simplecov', require: false, group: :test
+  gem 'coveralls'
+  gem 'simplecov_json_formatter'
 end
 
 group :development do
