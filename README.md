@@ -27,3 +27,9 @@ alt="IMAGE ALT TEXT HERE" width="560" height="315" border="10" /></a>
 ### Database Credentials
 - username: root
 - password: expertiza 
+
+
+### Contributers 
+- Makarand Pundlik 
+- Anurag Gorkar 
+- Rutvik Kulkarni
